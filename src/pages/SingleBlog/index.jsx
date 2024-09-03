@@ -7,20 +7,23 @@ function SingleBlog() {
   const [post, setPost] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const { id } = useParams();
-  useEffect(() => {
-    axios.get(`https://dummyjson.com/posts/${id}`).then((res) =>{
+  const [errorInfo, setErrorInfo] = useState("");
 
-      setTimeout(() => {
+  useEffect(() => {
+    axios
+      .get(`https://dummyjson.com/posts/${id}`)
+      .then((res) => {
         setPost(res.data);
-        console.log(res.data);
-        
-      }, 1000)
-      setIsLoading(false);
-    }
-    );
-  }, [id]);
-  console.log(post);
-  
+      })
+      .catch((err) => {
+        setErrorInfo(err.message);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 1000);
+      });
+  }, []);
 
   return (
     <div>
@@ -28,21 +31,17 @@ function SingleBlog() {
         <>
           <div className="spinner">Loading...</div>
         </>
+      ) : Object.keys(post).length ? (
+        <>
+          <h1>{post.title}</h1>
+          <p>{post.body}</p>
+          {post.tags?.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </>
       ) : (
         <>
-          Object.keys(post).length ? (
-            <>
-              <h1>{post.title}</h1>
-              <p>{post.body}</p>
-              {post.tags?.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </>
-          ) : (
-            <>
-            <p>Nottt</p>
-            </>
-          )
+          <p>{errorInfo}</p>
         </>
       )}
     </div>
